@@ -6,7 +6,7 @@ import 'package:skin_cancer_app/views/chat/chat_screen.dart';
 import 'package:skin_cancer_app/views/home/home_screen.dart';
 import 'package:skin_cancer_app/views/notification/notification_screen.dart';
 import 'package:skin_cancer_app/views/profile/profile_screen.dart';
-import '../utils/app_styles.dart' as AppColors;
+import '../utils/app_styles.dart';
 
 class MasterScreen extends StatefulWidget {
   const MasterScreen({super.key});
@@ -26,7 +26,7 @@ class _MasterScreenState extends State<MasterScreen> {
 
         return Scaffold(
           key: scaffoldKey,
-          backgroundColor: AppColors.backgroundColor,
+          backgroundColor: AppStyles.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(100),
             child: AppBar(
@@ -40,7 +40,7 @@ class _MasterScreenState extends State<MasterScreen> {
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppStyles.primaryColor,
                         backgroundImage: user?.avatarUrl != null
                             ? NetworkImage(user!.avatarUrl!)
                             : null,
@@ -59,7 +59,7 @@ class _MasterScreenState extends State<MasterScreen> {
                           children: [
                             Text(
                               user != null ? 'Hello, ${user.name}!' : 'Hello!',
-                              style: AppColors.headingStyle,
+                              style: AppStyles.headingStyle,
                             ),
                             const SizedBox(height: 4),
                             // const Text(
@@ -80,7 +80,7 @@ class _MasterScreenState extends State<MasterScreen> {
               padding: EdgeInsets.zero,
               children: [
                 DrawerHeader(
-                  decoration: const BoxDecoration(color: AppColors.primaryColor),
+                  decoration: const BoxDecoration(color: AppStyles.primaryColor),
                   child: Text(
                     user != null ? user.name : 'Menu',
                     style: const TextStyle(color: Colors.white, fontSize: 20),
@@ -115,7 +115,7 @@ class _MasterScreenState extends State<MasterScreen> {
             margin: const EdgeInsets.fromLTRB(20, 0, 20, 25),
             height: 65,
             decoration: BoxDecoration(
-              color: AppColors.primaryColor,
+              color: AppStyles.primaryColor,
               borderRadius: BorderRadius.circular(35),
               boxShadow: [
                 BoxShadow(

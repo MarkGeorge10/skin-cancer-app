@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/app_styles.dart' as AppColors;
+import '../../utils/app_styles.dart';
 
 
 class ChatScreen extends StatelessWidget {
@@ -11,10 +11,10 @@ class ChatScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppStyles.primaryColor,
       ),
       body: const Center(
-        child: Text('Chat Screen', style: TextStyle(fontSize: 24, color: AppColors.primaryColor)),
+        child: Text('Chat Screen', style: TextStyle(fontSize: 24, color: AppStyles.primaryColor)),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../exceptions/app_exceptions.dart';
 
 class ApiClient {
-  final String baseUrl = 'http://13.58.30.167:8000';
+  final String baseUrl = 'http://3.17.187.184:8000';
 
   Future<dynamic> post(String endpoint, dynamic body) async {
     final url = Uri.parse('$baseUrl$endpoint');
