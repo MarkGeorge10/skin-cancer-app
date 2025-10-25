@@ -1,25 +1,29 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 
 class ScreenVisibilityProvider with ChangeNotifier {
-  Map<String, bool> _screenVisibility = {
+  // Only the screens used in the new flow
+  final Map<String, bool> _screenVisibility = {
     'visit_motivation': true,
-    'admission': true,
     'patient_information': true,
-    // 'patient_medical_history': true,
-    // 'surgeries': true,
-    // 'symptoms': true,
-    // 'medical_examinations': true,
-    // 'diagnosis_tests': true,
-    // 'treatments': true,
-    // 'discharge': true,
+    'skin_type_sun': true,
+
+    'patient_medical_history': true,
+    'family_history': true,
+    'symptoms': true,
+    'surgeries': true,
+
+    'review_submit': true,
   };
 
-  Map<String, bool> get screenVisibility => _screenVisibility;
+
+  Map<String, bool> get screenVisibility => Map.unmodifiable(_screenVisibility);
 
   void toggleScreen(String screen, bool isEnabled) {
-    _screenVisibility[screen] = isEnabled;
-    notifyListeners();
-    debugPrint('ScreenVisibilityProvider: Updated $screen to $isEnabled');
+    if (_screenVisibility.containsKey(screen)) {
+      _screenVisibility[screen] = isEnabled;
+      notifyListeners();
+      debugPrint('ScreenVisibilityProvider: $screen → $isEnabled');
+    }
   }
 
   List<String> getEnabledScreens() {
@@ -30,26 +34,43 @@ class ScreenVisibilityProvider with ChangeNotifier {
   }
 
   int getStepForScreen(String screen) {
-    final enabledScreens = getEnabledScreens();
-    final index = enabledScreens.indexOf(screen);
+    final enabled = getEnabledScreens();
+    final index = enabled.indexOf(screen);
     return index >= 0 ? index : 0;
   }
 
   String? getNextScreen(String currentScreen) {
-    final enabledScreens = getEnabledScreens();
-    final currentIndex = enabledScreens.indexOf(currentScreen);
-    if (currentIndex >= 0 && currentIndex < enabledScreens.length - 1) {
-      return enabledScreens[currentIndex + 1];
+    final enabled = getEnabledScreens();
+    final currentIndex = enabled.indexOf(currentScreen);
+    if (currentIndex >= 0 && currentIndex < enabled.length - 1) {
+      return enabled[currentIndex + 1];
     }
     return null;
   }
 
   String? getPreviousScreen(String currentScreen) {
-    final enabledScreens = getEnabledScreens();
-    final currentIndex = enabledScreens.indexOf(currentScreen);
+    final enabled = getEnabledScreens();
+    final currentIndex = enabled.indexOf(currentScreen);
     if (currentIndex > 0) {
-      return enabledScreens[currentIndex - 1];
+      return enabled[currentIndex - 1];
     }
     return null;
+  }
+
+  /// Optional: Reset to default (useful for testing)
+  void reset() {
+    // Cannot reassign a final variable. Clear and update instead.
+    _screenVisibility.clear();
+    _screenVisibility.addAll({
+      'visit_motivation': true,
+      'patient_information': true,
+      'skin_type_sun': true,
+      'family_history': true,
+      'patient_medical_history': true,
+      'symptoms': true,
+      'surgeries': true,
+      'review_submit': true,
+    });
+    notifyListeners();
   }
 }

@@ -4,170 +4,111 @@ import 'package:provider/provider.dart';
 
 import 'package:skin_cancer_app/view_model/auth_view_model.dart';
 import 'package:skin_cancer_app/view_model/screen_visibility_provider.dart';
+
 import 'package:skin_cancer_app/views/auth/login_screen.dart';
 import 'package:skin_cancer_app/views/auth/register_screen.dart';
 import 'package:skin_cancer_app/views/home/home_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/admission_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/diagnosis_tests_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/discharge_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/medical_examinations_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/patient_information_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/patient_medical_history_screen.dart';
+import 'package:skin_cancer_app/views/patient_intake/SkinTypeSunExposureScreen.dart';
+import 'package:skin_cancer_app/views/patient_intake/review_submit_screen.dart';
 import 'package:skin_cancer_app/views/patient_intake/screen_selection_screen.dart';
 import 'package:skin_cancer_app/views/patient_intake/surgeries_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/symptoms_screen.dart';
-import 'package:skin_cancer_app/views/patient_intake/treatments_screen.dart';
+
+// Import only the screens used in the new flow
 import 'package:skin_cancer_app/views/patient_intake/visit_motivation_screen.dart';
+import 'package:skin_cancer_app/views/patient_intake/patient_information_screen.dart';
+import 'package:skin_cancer_app/views/patient_intake/family_history_screen.dart';
+import 'package:skin_cancer_app/views/patient_intake/patient_medical_history_screen.dart';
+import 'package:skin_cancer_app/views/patient_intake/symptoms_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
   routes: [
+    // Root → redirect based on auth
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
       redirect: (context, state) {
-        final authVM = Provider.of<AuthViewModel>(context, listen: false);
-        debugPrint('Root redirect: currentUser=${authVM.currentUser}');
-        if (authVM.currentUser == null) {
-          debugPrint('Root redirect: Navigating to /login');
-          return '/login';
-        }
-        debugPrint('Root redirect: Navigating to /screen_selection');
+        // final authVM = Provider.of<AuthViewModel>(context, listen: false);
+        // if (authVM.currentUser == null) return '/login';
+
+        // Go directly to the screen selection for testing
         return '/screen_selection';
       },
     ),
-    GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
-    ),
+
+    // Auth
+    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(
       path: '/signup',
-      builder: (context, state) => const RegisterScreen(),
-      redirect: (context, state) {
-        final authVM = Provider.of<AuthViewModel>(context, listen: false);
-        debugPrint('Signup redirect: currentUser=${authVM.currentUser}');
-        if (authVM.currentUser != null) {
-          debugPrint('Signup redirect: Navigating to /screen_selection');
-          return '/screen_selection';
-        }
-        debugPrint('Signup redirect: Staying on /signup');
-        return null;
-      },
+      builder: (_, __) => const RegisterScreen(),
+      // redirect: (context, state) {
+      //   final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      //   return authVM.currentUser != null ? '/screen_selection' : null;
+      // },
     ),
+
+    // Screen Selection
     GoRoute(
       path: '/screen_selection',
-      builder: (context, state) => const ScreenSelectionScreen(),
-      redirect: (context, state) {
-        final authVM = Provider.of<AuthViewModel>(context, listen: false);
-        // debugPrint('ScreenSelection redirect: currentUser=${authVM.currentUser}');
-        // if (authVM.currentUser == null) {
-        //   debugPrint('ScreenSelection redirect: Navigating to /login');
-        //   return '/login';
-        // }
-        debugPrint('ScreenSelection redirect: Staying on /screen_selection');
-        return null;
-      },
+      builder: (_, __) => const ScreenSelectionScreen(),
+      // redirect: (context, state) {
+      //   final authVM = Provider.of<AuthViewModel>(context, listen: false);
+      //   return authVM.currentUser == null ? '/login' : null;
+      // },
     ),
+
+    // Patient Intake Flow
     GoRoute(
       path: '/patient_intake',
       redirect: (context, state) {
-        final authVM = Provider.of<AuthViewModel>(context, listen: false);
-        final visibilityProvider = Provider.of<ScreenVisibilityProvider>(context, listen: false);
-        debugPrint('PatientIntake redirect: currentUser=${authVM.currentUser}, enabledScreens=${visibilityProvider.getEnabledScreens()}, uri=${state.uri}');
-        // if (authVM.currentUser == null) {
-        //   debugPrint('PatientIntake redirect: Navigating to /login');
-        //   return '/login';
-        // }
-        // Only redirect if the path is exactly '/patient_intake'
+        // final authVM = Provider.of<AuthViewModel>(context, listen: false);
+        final visibility = Provider.of<ScreenVisibilityProvider>(context, listen: false);
+
+        // if (authVM.currentUser == null) return '/login';
+
+        // Only redirect if at base path
         if (state.uri.path == '/patient_intake') {
-          final enabledScreens = visibilityProvider.getEnabledScreens();
-          if (enabledScreens.isEmpty) {
-            debugPrint('PatientIntake redirect: No enabled screens, navigating to /screen_selection');
-            return '/screen_selection';
-          }
-          final firstScreen = enabledScreens.first;
-          final step = visibilityProvider.getStepForScreen(firstScreen);
-          debugPrint('PatientIntake redirect: Navigating to /patient_intake/$firstScreen?step=$step');
-          return '/patient_intake/$firstScreen?step=$step';
+          final enabled = visibility.getEnabledScreens();
+          if (enabled.isEmpty) return '/screen_selection';
+          final first = enabled.first;
+          final step = visibility.getStepForScreen(first);
+          return '/patient_intake/$first?step=$step';
         }
-        debugPrint('PatientIntake redirect: No redirect needed for ${state.uri.path}');
         return null;
       },
       routes: [
-        GoRoute(
-          path: 'visit_motivation',
-          builder: (context, state) => VisitMotivationScreen(
-            step: int.parse(state.uri.queryParameters['step'] ?? '0'),
-          ),
-        ),
-        GoRoute(
-          path: 'admission',
-          builder: (context, state) => AdmissionScreen(
-            step: int.parse(state.uri.queryParameters['step'] ?? '1'),
-          ),
-        ),
-        GoRoute(
-          path: 'patient_information',
-          builder: (context, state) => PatientInformationScreen(
-            step: int.parse(state.uri.queryParameters['step'] ?? '2'),
-          ),
-        ),
-        // GoRoute(
-        //   path: 'patient_medical_history',
-        //   builder: (context, state) => PatientMedicalHistoryScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '3'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'surgeries',
-        //   builder: (context, state) => SurgeriesScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '4'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'symptoms',
-        //   builder: (context, state) => SymptomsScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '5'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'medical_examinations',
-        //   builder: (context, state) => MedicalExaminationsScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '6'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'diagnosis_tests',
-        //   builder: (context, state) => DiagnosisTestsScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '7'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'treatments',
-        //   builder: (context, state) => TreatmentsScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '8'),
-        //   ),
-        // ),
-        // GoRoute(
-        //   path: 'discharge',
-        //   builder: (context, state) => DischargeScreen(
-        //     step: int.parse(state.uri.queryParameters['step'] ?? '9'),
-        //   ),
-        // ),
+        _intakeRoute('visit_motivation', (s) => VisitMotivationScreen(step: _step(s))),
+        _intakeRoute('patient_information', (s) => PatientInformationScreen(step: _step(s))),
+        _intakeRoute('skin_type_sun', (s) => SkinTypeSunExposureScreen(step: _step(s))),
+        _intakeRoute('family_history', (s) => FamilyHistoryScreen(step: _step(s))),
+        _intakeRoute('patient_medical_history', (s) => PatientMedicalHistoryScreen(step: _step(s))),
+        _intakeRoute('symptoms', (s) => SymptomsScreen(step: _step(s))),
+        _intakeRoute('surgeries', (s) => SurgeriesScreen(step: _step(s))),
+        _intakeRoute('review_submit', (s) => ReviewSubmitScreen(step: _step(s))),
       ],
     ),
+
+    // Fallback
     GoRoute(
       path: '/error',
-      builder: (context, state) => Scaffold(
-        body: Center(
-          child: Text('Page not found: ${state.uri}'),
-        ),
+      builder: (_, state) => Scaffold(
+        body: Center(child: Text('Page not found: ${state.uri}')),
       ),
     ),
   ],
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(
-      child: Text('Error: ${state.error}'),
-    ),
+  errorBuilder: (_, state) => Scaffold(
+    body: Center(child: Text('Error: ${state.error}')),
   ),
 );
+
+/// Helper to reduce boilerplate
+GoRoute _intakeRoute(String path, Widget Function(GoRouterState) builder) {
+  return GoRoute(
+    path: path,
+    builder: (context, state) => builder(state),
+  );
+}
+
+/// Extract step from query params
+int _step(GoRouterState state) {
+  return int.tryParse(state.uri.queryParameters['step'] ?? '0') ?? 0;
+}

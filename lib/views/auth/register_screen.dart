@@ -103,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fieldName: 'Full Name',
                       fieldType: VALIDATION_TYPE.TEXT,
                     );
-                    formProvider.setValidationError('register', 'name', error);
+                    formProvider.setValidationError('register', 'name', error!);
                     return error;
                   },
                   onChanged: (value) {
@@ -124,7 +124,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fieldName: 'Email',
                       fieldType: VALIDATION_TYPE.EMAIL,
                     );
-                    formProvider.setValidationError('register', 'email', error);
+                    formProvider.setValidationError('register', 'email', error!);
                     return error;
                   },
                   onChanged: (value) {
@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fieldName: 'Password',
                       fieldType: VALIDATION_TYPE.PASSWORD,
                     );
-                    formProvider.setValidationError('register', 'password', error);
+                    formProvider.setValidationError('register', 'password', error!);
                     return error;
                   },
                   onChanged: (value) {

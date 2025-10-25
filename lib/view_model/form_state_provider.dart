@@ -1,95 +1,72 @@
 import 'package:flutter/material.dart';
 
 class FormStateProvider extends ChangeNotifier {
-  // Store form data as a nested map: {section: {field: value}}
+  // Only the sections used in the new flow
   final Map<String, Map<String, dynamic>> _formData = {
     'visit_motivation': {},
-    'admission': {},
     'patient_information': {},
+    'skin_sun': {},
+    'family_history': {},
     'patient_medical_history': {},
-    'surgeries': {},
+    'surgeries': {}, // 1. Add the new 'surgeries' section
     'symptoms': {},
-    'medical_examinations': {},
-    'diagnosis_tests': {},
-    'treatments': {},
-    'discharge': {},
+    'review_submit': {}, // optional
+    'register': {}, // Add register section
+    'login': {}, // Add login section
   };
 
-  // Store validation errors as a nested map: {section: {field: errorMessage}}
-  final Map<String, Map<String, String?>> _validationErrors = {
+  final Map<String, Map<String, String?>> _errors = {
     'visit_motivation': {},
-    'admission': {},
     'patient_information': {},
+    'skin_sun': {},
     'patient_medical_history': {},
-    'surgeries': {},
+    'family_history': {},
     'symptoms': {},
-    'medical_examinations': {},
-    'diagnosis_tests': {},
-    'treatments': {},
-    'discharge': {},
+    'surgeries': {}, // 2. Add the 'surgeries' section for errors
+
   };
 
-  // Getter for form data
-  Map<String, Map<String, dynamic>> get formData => _formData;
+  // Getters
+  Map<String, Map<String, dynamic>> get formData => Map.unmodifiable(_formData);
+  Map<String, Map<String, String?>> get errors => Map.unmodifiable(_errors);
 
-  // Getter for validation errors
-  Map<String, Map<String, String?>> get validationErrors => _validationErrors;
-
-  // Update a field value in the specified section
-  void updateField(String section, String field, dynamic value) {
-    if (!_formData.containsKey(section)) {
-      _formData[section] = {};
-    }
+  // Update field
+  void updateField(String section, String field, dynamic value, {bool silent = false}) { // 3. Add the 'silent' parameter
+    _formData.putIfAbsent(section, () => {});
     _formData[section]![field] = value;
-    notifyListeners();
-  }
+    _clearError(section, field);
 
-  // Set or clear a validation error for a field
-  void setValidationError(String section, String field, String? error) {
-    if (!_validationErrors.containsKey(section)) {
-      _validationErrors[section] = {};
+    // 4. Only notify listeners if the update is not silent
+    if (!silent) {
+      notifyListeners();
     }
-    _validationErrors[section]![field] = error;
+  }
+
+  // Validation - RENAMED THE METHOD
+  void setValidationError(String section, String field, String error) {
+    _errors.putIfAbsent(section, () => {});
+    _errors[section]![field] = error;
     notifyListeners();
   }
 
-  // Validate a specific section (returns true if no errors)
+  void _clearError(String section, String field) {
+    if (_errors.containsKey(section)) {
+      _errors[section]![field] = null;
+    }
+  }
+
   bool validateSection(String section) {
-    if (!_validationErrors.containsKey(section)) {
-      return true; // No fields, no errors
-    }
-    return _validationErrors[section]!.values.every((error) => error == null);
+    final sectionErrors = _errors[section];
+    return sectionErrors == null || sectionErrors.values.every((e) => e == null);
   }
 
-  // Validate the entire form (returns true if all sections are valid)
   bool validateForm() {
-    return _validationErrors.keys.every((section) => validateSection(section));
+    return _errors.keys.every(validateSection);
   }
 
-  // Submit the form (placeholder for actual submission logic)
-  void submitForm() {
-    if (validateForm()) {
-      // Placeholder: Print form data to console
-      print('Form submitted successfully:');
-      _formData.forEach((section, fields) {
-        print('$section: $fields');
-      });
-      // TODO: Implement actual submission logic (e.g., API call, local storage)
-    } else {
-      print('Form submission failed due to validation errors:');
-      _validationErrors.forEach((section, errors) {
-        print('$section errors: $errors');
-      });
-    }
-    notifyListeners();
-  }
-
-  // Clear all form data and errors
   void clearForm() {
-    _formData.forEach((section, _) {
-      _formData[section] = {};
-      _validationErrors[section] = {};
-    });
+    _formData.forEach((k, _) => _formData[k] = {});
+    _errors.forEach((k, _) => _errors[k] = {});
     notifyListeners();
   }
 }

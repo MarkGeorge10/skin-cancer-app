@@ -1,293 +1,112 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../utils/app_styles.dart';
-import '../../utils/validation.dart';
-import '../widgets/custom_button.dart';
 import 'package:go_router/go_router.dart';
-import '../widgets/custom_text_field.dart';
+import 'package:provider/provider.dart';
+import '../../utils/helper.dart';
 import '../../view_model/form_state_provider.dart';
+import '../../view_model/screen_visibility_provider.dart';
+import '../widgets/intake_form.dart';
 
-class SurgeriesScreen extends StatefulWidget {
+class SurgeriesScreen extends StatelessWidget {
   final int step;
   const SurgeriesScreen({super.key, required this.step});
 
-  @override
-  State<SurgeriesScreen> createState() => _SurgeriesScreenState();
-}
-
-class _SurgeriesScreenState extends State<SurgeriesScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _previousSurgeriesController = TextEditingController();
-  final _surgeryDatesController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    final formProvider = Provider.of<FormStateProvider>(context, listen: false);
-    _previousSurgeriesController.text = formProvider.formData['surgeries']?['previous_surgeries'] ?? '';
-    _surgeryDatesController.text = formProvider.formData['surgeries']?['surgery_dates'] ?? '';
+  // Helper to add a new item
+  void _addItem(FormStateProvider form) {
+    final List<Map<String, dynamic>> currentList = List.from(form.formData['surgeries']?['history'] ?? []);
+    currentList.add({'name': '', 'year': ''});
+    form.updateField('surgeries', 'history', currentList);
   }
 
-  @override
-  void dispose() {
-    _previousSurgeriesController.dispose();
-    _surgeryDatesController.dispose();
-    super.dispose();
+  // Helper to remove an item
+  void _removeItem(FormStateProvider form, int index) {
+    final List<Map<String, dynamic>> currentList = List.from(form.formData['surgeries']?['history'] ?? []);
+    currentList.removeAt(index);
+    form.updateField('surgeries', 'history', currentList);
   }
 
-  void _next(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      context.go('/patient_intake/symptoms?step=5');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please correct the errors in the form'),
-          backgroundColor: AppStyles.errorColor,
-        ),
-      );
-    }
-  }
-
-  void _back(BuildContext context) {
-    context.go('/patient_intake/patient_medical_history?step=3');
-  }
-
-  List<Step> _buildSteps(BuildContext context) {
-    final formProvider = Provider.of<FormStateProvider>(context);
-    final steps = [
-      Step(
-        title: const Text('Visit Motivation'),
-        state: formProvider.validateSection('visit_motivation') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 0,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Admission'),
-        state: formProvider.validateSection('admission') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 1,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Patient Info'),
-        state: formProvider.validateSection('patient_information') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 2,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Medical History'),
-        state: formProvider.validateSection('patient_medical_history') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 3,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Surgeries'),
-        state: formProvider.validateSection('surgeries') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 4,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Symptoms'),
-        state: formProvider.validateSection('symptoms') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 5,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Examinations'),
-        state: formProvider.validateSection('medical_examinations') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 6,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Diagnosis Tests'),
-        state: formProvider.validateSection('diagnosis_tests') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 7,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Treatments'),
-        state: formProvider.validateSection('treatments') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 8,
-        content: Container(),
-      ),
-      Step(
-        title: const Text('Discharge'),
-        state: formProvider.validateSection('discharge') ? StepState.complete : StepState.indexed,
-        isActive: widget.step == 9,
-        content: Container(),
-      ),
-    ];
-    return steps;
+  // Helper to update an item's text
+  void _updateItem(FormStateProvider form, int index, String key, String value) {
+    final List<Map<String, dynamic>> currentList = List.from(form.formData['surgeries']?['history'] ?? []);
+    currentList[index][key] = value;
+    form.updateField('surgeries', 'history', currentList, silent: true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final formProvider = Provider.of<FormStateProvider>(context);
+    final vis = Provider.of<ScreenVisibilityProvider>(context, listen: false);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Surgical History'),
-      ),
-      body: Column(
-        children: [
-          // Stepper(
-          //   type: StepperType.horizontal,
-          //   currentStep: widget.step,
-          //   steps: _buildSteps(context),
-          //   onStepTapped: (index) {
-          //     if (index <= widget.step || formProvider.validateSection(_getSectionName(index))) {
-          //       context.go('/patient_intake/${_getRouteName(index)}?step=$index');
-          //     }
-          //   },
-          //   controlsBuilder: (context, details) => Container(),
-          // ),
-          Expanded(
-            child: Padding(
-              padding: AppStyles.screenPadding,
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    _buildTextField(
-                      context,
-                      controller: _previousSurgeriesController,
-                      labelText: 'Previous Surgeries',
-                      hintText: 'Enter previous surgeries (optional)',
-                      icon: Icons.healing,
-                      maxLines: 3,
-                      validator: (value) {
-                        final error = checkFieldValidation(
-                          context: context,
-                          val: value,
-                          fieldName: 'Previous Surgeries',
-                          fieldType: VALIDATION_TYPE.DESCRIPTIVE_TEXT,
-                          isRequired: false,
-                        );
-                        formProvider.setValidationError('surgeries', 'previous_surgeries', error);
-                        return error;
-                      },
-                      onChanged: (value) {
-                        formProvider.updateField('surgeries', 'previous_surgeries', value);
-                      },
-                    ),
-                    _buildTextField(
-                      context,
-                      controller: _surgeryDatesController,
-                      labelText: 'Surgery Dates',
-                      hintText: 'Enter surgery dates (optional)',
-                      icon: Icons.calendar_today,
-                      keyboardType: TextInputType.datetime,
-                      validator: (value) {
-                        final error = checkFieldValidation(
-                          context: context,
-                          val: value,
-                          fieldName: 'Surgery Dates',
-                          fieldType: VALIDATION_TYPE.DATE,
-                          isRequired: false,
-                        );
-                        formProvider.setValidationError('surgeries', 'surgery_dates', error);
-                        return error;
-                      },
-                      onChanged: (value) {
-                        formProvider.updateField('surgeries', 'surgery_dates', value);
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: CustomButton(
-                            text: 'Back',
-                            onPressed: () => _back(context),
+    return Consumer<FormStateProvider>(
+      builder: (context, form, child) {
+        final List<dynamic> surgeries = form.formData['surgeries']?['history'] ?? [];
+
+        return IntakeForm(
+          formKey: GlobalKey<FormState>(),
+          onBack: () {
+            final prevScreen = vis.getPreviousScreen('surgeries');
+            if (prevScreen != null) {
+              final prevStep = vis.getStepForScreen(prevScreen);
+              context.go('/patient_intake/$prevScreen?step=$prevStep');
+            } else {
+              // Fallback if there's no previous screen (e.g., go to selection)
+              context.go('/screen_selection');
+            }
+          },
+          onNext: () => goNext(context, vis, 'surgeries'),
+          children: [
+            Text(
+              'Please list any past surgeries',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            if (surgeries.isEmpty)
+              const Center(child: Text('No surgeries added.')),
+            ...List.generate(surgeries.length, (index) {
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Surgery #${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            onPressed: () => _removeItem(form, index),
                           ),
-                        ),
-                        Flexible(
-                          child: CustomButton(
-                            text: 'Next',
-                            onPressed: () => _next(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      TextFormField(
+                        initialValue: surgeries[index]['name'],
+                        decoration: const InputDecoration(labelText: 'Surgery Name'),
+                        onChanged: (val) => _updateItem(form, index, 'name', val),
+                        validator: (v) => (v?.isEmpty ?? true) ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        initialValue: surgeries[index]['year'],
+                        decoration: const InputDecoration(labelText: 'Year of Surgery'),
+                        keyboardType: TextInputType.number,
+                        onChanged: (val) => _updateItem(form, index, 'year', val),
+                        validator: (v) => (v?.isEmpty ?? true) ? 'Required' : null,
+                      ),
+                    ],
+                  ),
                 ),
+              );
+            }),
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Add Surgery'),
+                onPressed: () => _addItem(form),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
-  }
-
-  Widget _buildTextField(
-      BuildContext context, {
-        required TextEditingController controller,
-        required String labelText,
-        required String hintText,
-        required IconData icon,
-        int? maxLines,
-        TextInputType? keyboardType,
-        String? Function(String?)? validator,
-        ValueChanged<String>? onChanged,
-      }) {
-    return Padding(
-      padding: AppStyles.fieldPadding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppStyles.inputFillColor(context),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppStyles.secondaryTextColor),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: CustomTextField(
-              controller: controller,
-              labelText: labelText,
-              hintText: hintText,
-              maxLines: maxLines,
-              keyboardType: keyboardType,
-              validator: validator,
-              onChanged: onChanged,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getSectionName(int index) {
-    const sections = [
-      'visit_motivation',
-      'admission',
-      'patient_information',
-      'patient_medical_history',
-      'surgeries',
-      'symptoms',
-      'medical_examinations',
-      'diagnosis_tests',
-      'treatments',
-      'discharge',
-    ];
-    return sections[index];
-  }
-
-  String _getRouteName(int index) {
-    const routes = [
-      'visit_motivation',
-      'admission',
-      'patient_information',
-      'patient_medical_history',
-      'surgeries',
-      'symptoms',
-      'medical_examinations',
-      'diagnosis_tests',
-      'treatments',
-      'discharge',
-    ];
-    return routes[index];
   }
 }
