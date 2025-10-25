@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../utils/app_styles.dart' as AppColors;
+import '../../utils/app_styles.dart';
 import '../../view_model/home_view_model.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
         builder: (context, viewModel, child) {
           return Container(
             decoration: BoxDecoration(
-              color: AppColors.backgroundColor,
+              color: AppStyles.backgroundColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(30),
                 topRight: Radius.circular(30),
@@ -27,8 +27,8 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Highlights Feed', style: AppColors.headingStyle),
-                      Icon(Icons.notifications_none, color: AppColors.primaryColor),
+                      Text('Highlights Feed', style: AppStyles.headingStyle),
+                      Icon(Icons.notifications_none, color: AppStyles.primaryColor),
                     ],
                   ),
                 ),
@@ -36,19 +36,19 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: AppColors.inputDecoration(
-                            hintText: 'Search',
-                            icon: Icons.search,
-                          ),
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: TextField(
+                      //     decoration: AppStyles.inputDecoration(
+                      //       hintText: 'Search',
+                      //       icon: Icons.search,
+                      //     ),
+                      //   ),
+                      // ),
                       const SizedBox(width: 15),
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.inputFillColor,
+                          color: AppStyles.inputFillColor(context),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.tune, color: Colors.grey),

@@ -3,7 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/app_styles.dart' as AppColors;
+import '../../utils/app_styles.dart';
 
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
@@ -13,10 +13,10 @@ class NotificationsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppStyles.primaryColor,
       ),
       body: const Center(
-        child: Text('Notifications Screen', style: TextStyle(fontSize: 24, color: AppColors.primaryColor)),
+        child: Text('Notifications Screen', style: TextStyle(fontSize: 24, color: AppStyles.primaryColor)),
       ),
     );
   }

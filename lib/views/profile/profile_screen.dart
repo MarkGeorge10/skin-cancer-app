@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/app_styles.dart' as AppColors;
+import '../../utils/app_styles.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,10 +10,10 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppStyles.primaryColor,
       ),
       body: const Center(
-        child: Text('Profile Screen', style: TextStyle(fontSize: 24, color: AppColors.primaryColor)),
+        child: Text('Profile Screen', style: TextStyle(fontSize: 24, color: AppStyles.primaryColor)),
       ),
     );
   }
